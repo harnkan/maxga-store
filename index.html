@@ -11,7 +11,7 @@
 :root[data-theme="light"]{color-scheme:light;--bg:#fbf6ff;--card:#fff;--card2:#f1e9fb;--tx:#2a2240;--mu:#7a6f96;--ac:#e0791a;--ln:#e3d7f2;--ok:#16a064}
 :root[data-theme="dark"]{color-scheme:dark;--bg:#14121f;--card:#1f1c30;--card2:#2a2640;--tx:#f4f1ff;--mu:#9b95b8;--ac:#ffb454;--ln:#38334f;--ok:#5be3a4}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans Thai","Sarabun",system-ui,sans-serif;padding:12px 12px 90px;max-width:640px;margin-inline:auto;font-size:15px}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans Thai","Sarabun",system-ui,sans-serif;font-size:15px}
 h1{font-size:22px;margin:6px 0 12px;display:flex;justify-content:space-between;align-items:center}
 section{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:14px;margin-bottom:14px}
 h2{font-size:17px;margin:0 0 10px}
@@ -42,17 +42,28 @@ button.x{background:none;color:var(--mu);padding:4px 8px}
 .mu{color:var(--mu);font-size:13px}
 #toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--ok);color:#052;padding:10px 16px;border-radius:999px;font-weight:700;display:none}
 [hidden]{display:none!important}
-#shopbar{margin:6px 0 12px;border:1px solid var(--ac);border-radius:16px;overflow:hidden;background:var(--card)}
-.shopname{text-align:center;font-weight:800;font-size:18px;color:var(--ac);padding:8px 12px}
-#banner{background:var(--card2)}
-#bimg{display:block;width:100%;height:auto;max-height:clamp(110px,26vh,220px);object-fit:contain}
+#hero{position:relative;height:calc(100vh - env(safe-area-inset-top,0px));height:calc(100dvh - env(safe-area-inset-top,0px));display:flex;flex-direction:column;align-items:center;overflow:hidden;background:#000;color:#fff}
+#hero>*{position:relative;z-index:1}
+#hero>#hbg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;filter:blur(28px) brightness(.5);transform:scale(1.15)}
+.hname{padding:16px 16px 6px;font-size:20px;font-weight:800;letter-spacing:.5px;text-shadow:0 2px 8px rgba(0,0,0,.6);text-align:center}
+.himg{flex:1;min-height:0;width:100%;padding:6px 12px;display:flex;align-items:center;justify-content:center}
+#himg{width:100%;height:100%;object-fit:contain;border-radius:12px}
+.hbtn{margin:8px 0 calc(16px + env(safe-area-inset-bottom));background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.5);padding:12px 22px;border-radius:999px;font-size:16px}
+.harr{display:block;line-height:.7;font-size:22px;animation:hb 1.4s infinite}
+@keyframes hb{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+#app{padding:12px 12px 90px;max-width:640px;margin-inline:auto}
+#shopline{font-weight:800;color:var(--ac);font-size:16px;margin:0 2px 6px}
 </style>
 </head>
 <body>
-<header id="shopbar" hidden>
-  <div class="shopname" id="shopname"></div>
-  <div id="banner" hidden><img id="bimg" alt="โปรโมชันร้าน"></div>
-</header>
+<section id="hero" hidden>
+  <div id="hbg"></div>
+  <div class="hname" id="hname"></div>
+  <div class="himg"><img id="himg" alt="โปรโมชันร้าน"></div>
+  <button class="hbtn" onclick="document.getElementById('app').scrollIntoView({behavior:'smooth'})">เลื่อนลงเพื่อหารค่าเหล้า<span class="harr">⌄</span></button>
+</section>
+<main id="app">
+<div id="shopline" hidden></div>
 <h1><span>🍻 หารค่าเหล้า</span><button class="g" onclick="resetAll()">🗑️ เริ่มบิลใหม่</button></h1>
 
 <section>
@@ -88,6 +99,7 @@ button.x{background:none;color:var(--mu);padding:4px 8px}
   <div id="cards" style="margin-top:12px"></div>
 </section>
 
+</main>
 <div class="sticky"><button onclick="copyLine()">📋 คัดลอกสรุปยอดส่งเข้ากลุ่ม LINE</button></div>
 <div id="toast">คัดลอกแล้ว ✅</div>
 
@@ -120,21 +132,25 @@ const KEY='harn-lao-v1'+(SHOP?':'+SHOP.id:'');
 const DK=['sun','mon','tue','wed','thu','fri','sat'];
 let bannerDay=-1;
 function setBanner(){
-  const bn=document.getElementById('banner'),im=document.getElementById('bimg');
+  const hr=document.getElementById('hero'),im=document.getElementById('himg'),bg=document.getElementById('hbg');
   const d=new Date().getDay();bannerDay=d;
   const list=[(SHOP.days||{})[DK[d]],SHOP.fallback].filter((u,i,a)=>u&&a.indexOf(u)===i);
-  let i=0;bn.hidden=true;
-  const next=()=>{if(i>=list.length){bn.hidden=true;return}im.src=list[i++]};
-  im.onload=()=>{bn.hidden=false};
+  if(!list.length){hr.hidden=true;return}
+  let i=0;
+  const next=()=>{if(i>=list.length){hr.hidden=true;return}im.src=list[i];bg.style.backgroundImage='url("'+list[i]+'")';i++};
   im.onerror=next;
-  next();
+  hr.hidden=false;next();
 }
 function initShop(){
   if(!SHOP)return;
-  document.getElementById('shopbar').hidden=false;
-  document.getElementById('shopname').textContent=SHOP.name;
+  document.getElementById('hname').textContent=SHOP.name;
+  const sl=document.getElementById('shopline');sl.textContent='🏪 '+SHOP.name;sl.hidden=false;
   document.title=SHOP.name+' · หารค่าเหล้า';
   setBanner();
+  const hr=document.getElementById('hero'),st=document.querySelector('.sticky');
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(es=>{const e=es[0];st.style.display=(e.isIntersecting&&e.intersectionRatio>.5)?'none':''},{threshold:[0,.5,1]}).observe(hr);
+  }
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&new Date().getDay()!==bannerDay)setBanner()});
 }
 const COLORS=['#ff6b9d','#4cc9f0','#ffd166','#06d6a0','#b388ff','#ff9f43','#7bed9f','#ff7675','#74b9ff','#fd79a8'];
