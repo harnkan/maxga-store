@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>หารค่าเหล้า 🍻</title>
+<style>
+:root{--bg:#14121f;--card:#1f1c30;--card2:#2a2640;--tx:#f4f1ff;--mu:#9b95b8;--ac:#ffb454;--ln:#38334f;--ok:#5be3a4}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){color-scheme:light;--bg:#fbf6ff;--card:#fff;--card2:#f1e9fb;--tx:#2a2240;--mu:#7a6f96;--ac:#e0791a;--ln:#e3d7f2;--ok:#16a064}}
+:root[data-theme="light"]{color-scheme:light;--bg:#fbf6ff;--card:#fff;--card2:#f1e9fb;--tx:#2a2240;--mu:#7a6f96;--ac:#e0791a;--ln:#e3d7f2;--ok:#16a064}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#14121f;--card:#1f1c30;--card2:#2a2640;--tx:#f4f1ff;--mu:#9b95b8;--ac:#ffb454;--ln:#38334f;--ok:#5be3a4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans Thai","Sarabun",system-ui,sans-serif;padding:12px 12px 90px;max-width:640px;margin-inline:auto;font-size:15px}
+h1{font-size:22px;margin:6px 0 12px;display:flex;justify-content:space-between;align-items:center}
+section{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:14px;margin-bottom:14px}
+h2{font-size:17px;margin:0 0 10px}
+input,select{background:var(--card2);color:var(--tx);border:1px solid var(--ln);border-radius:10px;padding:10px;font:inherit;font-size:16px;min-width:0}
+input[type=number]{width:100%}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:var(--ac);color:#241a05;font-weight:700}
+button.g{background:var(--card2);color:var(--tx);border:1px solid var(--ln)}
+button.x{background:none;color:var(--mu);padding:4px 8px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>input[type=text]{flex:1;min-width:120px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{border-radius:999px;padding:7px 12px;font-weight:700;border:2px solid;cursor:pointer;user-select:none;font-size:14px}
+.chip.off{background:transparent!important;opacity:.55}
+.item{background:var(--card2);border-radius:12px;padding:10px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.grid label{font-size:12px;color:var(--mu);display:block;margin-bottom:3px}
+.per{margin-top:8px;font-weight:700;color:var(--ok)}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs button{flex:1;padding:8px 4px;font-size:13px}
+.tot{font-size:30px;font-weight:800;color:var(--ac)}
+.pc{border-left:6px solid;border-radius:12px;background:var(--card2);padding:12px;margin-bottom:10px}
+.pc .n{display:flex;justify-content:space-between;align-items:baseline;font-weight:700}
+.pc .amt{font-size:26px;font-weight:800}
+.pc ul{margin:6px 0 0;padding:0;list-style:none;color:var(--mu);font-size:13px}
+.pc li{display:flex;justify-content:space-between;padding:2px 0}
+.sticky{position:fixed;left:0;right:0;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--ln)}
+.sticky button{width:100%;max-width:616px;display:block;margin:auto;padding:14px}
+.mu{color:var(--mu);font-size:13px}
+#toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--ok);color:#052;padding:10px 16px;border-radius:999px;font-weight:700;display:none}
+[hidden]{display:none!important}
+#shopbar{margin:6px 0 12px;border:1px solid var(--ac);border-radius:16px;overflow:hidden;background:var(--card)}
+.shopname{text-align:center;font-weight:800;font-size:18px;color:var(--ac);padding:8px 12px}
+#banner{background:var(--card2)}
+#bimg{display:block;width:100%;height:auto;max-height:clamp(110px,26vh,220px);object-fit:contain}
+</style>
+</head>
+<body>
+<header id="shopbar" hidden>
+  <div class="shopname" id="shopname"></div>
+  <div id="banner" hidden><img id="bimg" alt="โปรโมชันร้าน"></div>
+</header>
+<h1><span>🍻 หารค่าเหล้า</span><button class="g" onclick="resetAll()">🗑️ เริ่มบิลใหม่</button></h1>
+
+<section>
+  <h2>👤 เพื่อนในโต๊ะ</h2>
+  <div class="row"><input type="text" id="pn" placeholder="ชื่อเพื่อน" onkeydown="if(event.key==='Enter')addP()"><button onclick="addP()">+ เพิ่ม</button></div>
+  <div class="chips" id="plist"></div>
+  <div class="mu" style="margin-top:6px">แตะชื่อเพื่อนเพื่อเปลี่ยนสี / กด ✕ เพื่อลบ</div>
+</section>
+
+<section>
+  <h2>🍺 รอบโปรเครื่องดื่ม</h2>
+  <div id="promos"></div>
+  <button onclick="addPromo()">+ เพิ่มโปร / รอบสั่ง</button>
+</section>
+
+<section id="extras"></section>
+
+<section>
+  <h2>🧾 ค่าบริการ / ภาษี / ทิป</h2>
+  <div class="grid">
+    <div><label>Service Charge (%)</label><input type="number" inputmode="decimal" id="svc" oninput="S.svc=+this.value||0;save();renderSum()"></div>
+    <div><label>VAT (%)</label><input type="number" inputmode="decimal" id="vat" oninput="S.vat=+this.value||0;save();renderSum()"></div>
+    <div><label>ทิป (บาท)</label><input type="number" inputmode="decimal" id="tip" oninput="S.tip=+this.value||0;save();renderSum()"></div>
+  </div>
+  <div class="mu" style="margin-top:6px">% คิดจากยอดสินค้าและกระจายตามสัดส่วนที่แต่ละคนโดน ส่วนทิปหารเท่ากันทุกคน</div>
+</section>
+
+<section>
+  <h2>💰 สรุปยอดจ่าย</h2>
+  <div class="mu">ยอดรวมทั้งโต๊ะ</div>
+  <div class="tot" id="total">0</div>
+  <div class="mu" id="breakdown"></div>
+  <div id="cards" style="margin-top:12px"></div>
+</section>
+
+<div class="sticky"><button onclick="copyLine()">📋 คัดลอกสรุปยอดส่งเข้ากลุ่ม LINE</button></div>
+<div id="toast">คัดลอกแล้ว ✅</div>
+
+<script>
+/* ===== ตั้งค่าร้าน (แก้/เพิ่มร้านที่นี่) =====
+   เปิดด้วย ?shop=รหัสร้าน เช่น index.html?shop=maxga
+   - ไม่ใส่ ?shop หรือไม่พบร้าน = โหมดทั่วไป (ไม่มีแบนเนอร์)
+   - อยากให้ลิงก์ปกติเป็นร้านนี้เลย ใส่รหัสร้านที่ DEFAULT_SHOP
+   - รูปรายวัน: ใส่ลิงก์/ชื่อไฟล์รูป เว้นว่าง '' = ใช้ fallback (ถ้าไม่มีก็ซ่อนแบนเนอร์) */
+const DEFAULT_SHOP='';
+const SHOPS={
+  maxga:{
+    name:'MAXGA.STORE',
+    aliases:['maxga.store'],
+    fallback:'./mon.png',
+    days:{mon:'./mon.png',tue:'',wed:'',thu:'',fri:'',sat:'',sun:''}
+  }
+  /* เพิ่มร้านใหม่: copy ก้อนด้านบนไปวางต่อ แล้วเปลี่ยนรหัสร้าน ชื่อ และรูป */
+};
+function findShop(){
+  let q='';
+  try{q=new URLSearchParams(location.search).get('shop')||DEFAULT_SHOP||''}catch(e){q=DEFAULT_SHOP||''}
+  q=String(q).trim().toLowerCase();if(!q)return null;
+  for(const k in SHOPS){const s=SHOPS[k];
+    if(k.toLowerCase()===q||(s.aliases||[]).includes(q)||s.name.toLowerCase()===q)return Object.assign({id:k},s)}
+  return null;
+}
+const SHOP=findShop();
+const KEY='harn-lao-v1'+(SHOP?':'+SHOP.id:'');
+const DK=['sun','mon','tue','wed','thu','fri','sat'];
+let bannerDay=-1;
+function setBanner(){
+  const bn=document.getElementById('banner'),im=document.getElementById('bimg');
+  const d=new Date().getDay();bannerDay=d;
+  const list=[(SHOP.days||{})[DK[d]],SHOP.fallback].filter((u,i,a)=>u&&a.indexOf(u)===i);
+  let i=0;bn.hidden=true;
+  const next=()=>{if(i>=list.length){bn.hidden=true;return}im.src=list[i++]};
+  im.onload=()=>{bn.hidden=false};
+  im.onerror=next;
+  next();
+}
+function initShop(){
+  if(!SHOP)return;
+  document.getElementById('shopbar').hidden=false;
+  document.getElementById('shopname').textContent=SHOP.name;
+  document.title=SHOP.name+' · หารค่าเหล้า';
+  setBanner();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&new Date().getDay()!==bannerDay)setBanner()});
+}
+const COLORS=['#ff6b9d','#4cc9f0','#ffd166','#06d6a0','#b388ff','#ff9f43','#7bed9f','#ff7675','#74b9ff','#fd79a8'];
+const CATS=[{k:'ice',ic:'🧊',nm:'น้ำแข็ง',ph:'เช่น น้ำแข็งถัง'},{k:'mix',ic:'🥤',nm:'โค้ก / น้ำอัดลม / โซดา / มิกเซอร์',ph:'เช่น โค้ก 3 ขวด'},{k:'food',ic:'🍟',nm:'อาหาร / กับแกล้ม',ph:'เช่น ปีกไก่ทอด'}];
+let S;
+function def(){return{people:[],promos:[],ice:[],mix:[],food:[],svc:0,vat:0,tip:0,tab:{},uid:1}}
+function load(){try{S=Object.assign(def(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=def()}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const id=()=>S.uid++;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>(Math.round(n*100)/100).toLocaleString('th-TH',{maximumFractionDigits:2});
+const P=i=>S.people.find(p=>p.id===i);
+
+function chipStyle(p,on){return `border-color:${p.c};${on?`background:${p.c};color:#1b1420`:`color:${p.c}`}`}
+
+function addP(){const el=document.getElementById('pn');const n=el.value.trim();if(!n)return;
+  S.people.push({id:id(),n,c:COLORS[S.people.length%COLORS.length]});el.value='';save();render();}
+function cycleColor(i){const p=P(i);p.c=COLORS[(COLORS.indexOf(p.c)+1)%COLORS.length];save();render();}
+let pend=null,pt;
+function twice(k,msg){if(pend===k){pend=null;return true}pend=k;say(msg);clearTimeout(pt);pt=setTimeout(()=>pend=null,3500);return false}
+function say(m){const e=document.getElementById('toast');e.textContent=m;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2500)}
+function showTxt(t){let a=document.getElementById('fallback');if(!a){a=document.createElement('textarea');a.id='fallback';a.style.cssText='width:100%;height:220px;margin-top:10px';document.getElementById('cards').after(a)}a.value=t;a.focus();a.select();say('แตะค้างที่ข้อความแล้วเลือก "คัดลอก"')}
+function delP(i){const p=P(i);if(!twice('del'+i,'กด ✕ อีกครั้งเพื่อลบ '+p.n))return;
+  S.people=S.people.filter(x=>x.id!==i);
+  [...S.promos,...S.ice,...S.mix,...S.food].forEach(it=>it.who=(it.who||[]).filter(w=>w!==i));save();render();}
+function addPromo(){S.promos.push({id:id(),n:'โปรที่ '+(S.promos.length+1),q:3,p:0,who:S.people.map(p=>p.id)});save();render();}
+function addItem(k){S[k].push({id:id(),n:'',p:0,all:true,who:S.people.map(p=>p.id)});save();render();}
+function find(k,i){return S[k].find(x=>x.id===i)}
+function setF(k,i,f,v){const it=find(k,i);it[f]=v;save();renderSum();updPer(k,i)}
+function delIt(k,i){S[k]=S[k].filter(x=>x.id!==i);save();render();}
+function tog(k,i,pid){const it=find(k,i);const j=it.who.indexOf(pid);j<0?it.who.push(pid):it.who.splice(j,1);save();render();}
+function setAll(k,i,v){const it=find(k,i);it.all=v;save();render();}
+function members(k,it){return (k==='promos'||!it.all)?it.who.filter(w=>P(w)):S.people.map(p=>p.id)}
+function perTxt(k,it){const m=members(k,it);return m.length?`ตกคนละ ฿${fmt(it.p/m.length)} (${m.length} คน)`:'⚠️ ยังไม่ได้เลือกคนหาร'}
+function updPer(k,i){const e=document.getElementById('per-'+k+i);if(e)e.textContent=perTxt(k,find(k,i))}
+function chips(k,it){return S.people.map(p=>{const on=it.who.includes(p.id);return `<span class="chip ${on?'':'off'}" style="${chipStyle(p,on)}" onclick="tog('${k}',${it.id},${p.id})">${esc(p.n)}</span>`}).join('')||'<span class="mu">เพิ่มรายชื่อเพื่อนก่อน</span>'}
+
+function render(){
+  document.getElementById('plist').innerHTML=S.people.map(p=>`<span class="chip" style="${chipStyle(p,true)}"><span onclick="cycleColor(${p.id})">${esc(p.n)}</span> <span onclick="delP(${p.id})" style="opacity:.7;margin-left:4px">✕</span></span>`).join('')||'<span class="mu">ยังไม่มีเพื่อน เพิ่มชื่อด้านบนได้เลย</span>';
+  document.getElementById('promos').innerHTML=S.promos.map(it=>`<div class="item">
+    <div class="row"><input type="text" style="flex:1" value="${esc(it.n)}" placeholder="ชื่อโปร เช่น โปร 3 ขวด" oninput="setF('promos',${it.id},'n',this.value)"><button class="x" onclick="delIt('promos',${it.id})">🗑️</button></div>
+    <div class="grid"><div><label>🍾 จำนวนขวด</label><input type="number" inputmode="numeric" value="${it.q}" oninput="setF('promos',${it.id},'q',+this.value||0)"></div>
+    <div><label>ราคาโปร (บาท)</label><input type="number" inputmode="decimal" value="${it.p||''}" oninput="setF('promos',${it.id},'p',+this.value||0)"></div></div>
+    <div class="mu" style="margin-top:8px">ใครร่วมหารโปรนี้ (แตะเปิด/ปิด)</div><div class="chips">${chips('promos',it)}</div>
+    <div class="per" id="per-promos${it.id}">${perTxt('promos',it)}</div></div>`).join('')||'<div class="mu" style="margin-bottom:8px">ยังไม่มีโปร กดปุ่มด้านล่างเพื่อเพิ่มรอบแรก</div>';
+  document.getElementById('extras').innerHTML=CATS.map(c=>`<h2>${c.ic} ${c.nm}</h2>`+S[c.k].map(it=>`<div class="item">
+    <div class="row"><input type="text" style="flex:1" value="${esc(it.n)}" placeholder="${c.ph}" oninput="setF('${c.k}',${it.id},'n',this.value)"><input type="number" inputmode="decimal" style="width:100px" placeholder="บาท" value="${it.p||''}" oninput="setF('${c.k}',${it.id},'p',+this.value||0)"><button class="x" onclick="delIt('${c.k}',${it.id})">🗑️</button></div>
+    <div class="tabs" style="margin-top:8px"><button class="${it.all?'':'g'}" onclick="setAll('${c.k}',${it.id},true)">👥 หารทุกคน</button><button class="${it.all?'g':''}" onclick="setAll('${c.k}',${it.id},false)">✅ เลือกเฉพาะคน</button></div>
+    ${it.all?'':`<div class="chips">${chips(c.k,it)}</div>`}
+    <div class="per" id="per-${c.k}${it.id}">${perTxt(c.k,it)}</div></div>`).join('')+`<button class="g" style="margin-bottom:16px" onclick="addItem('${c.k}')">+ เพิ่มรายการ${c.nm.split(' /')[0]}</button><br>`).join('');
+  ['svc','vat','tip'].forEach(f=>document.getElementById(f).value=S[f]||'');
+  renderSum();
+}
+
+function calc(){
+  const per={};S.people.forEach(p=>per[p.id]={sub:0,lines:[]});
+  let sub=0;const parts={promos:0,ice:0,mix:0,food:0};
+  const add=(k,it,label)=>{const m=members(k,it);if(!m.length||!it.p)return;sub+=it.p;parts[k]+=it.p;m.forEach(w=>{if(per[w]){per[w].sub+=it.p/m.length;per[w].lines.push([label,it.p/m.length])}})};
+  S.promos.forEach(it=>add('promos',it,'🍺 '+(it.n||'โปร')+(it.q?` (${it.q} ขวด)`:'')));
+  CATS.forEach(c=>S[c.k].forEach(it=>add(c.k,it,c.ic+' '+(it.n||c.nm.split(' /')[0]))));
+  const n=S.people.length||1;
+  S.people.forEach(p=>{const r=per[p.id];const b=r.sub;
+    const sv=b*S.svc/100;if(sv){r.lines.push(['Service '+S.svc+'%',sv])}
+    const vt=(b+sv)*S.vat/100;if(vt){r.lines.push(['VAT '+S.vat+'%',vt])}
+    const tp=S.tip/n;if(tp){r.lines.push(['💝 ทิป',tp])}
+    r.total=b+sv+vt+tp});
+  const total=S.people.reduce((a,p)=>a+per[p.id].total,0);
+  return{per,total,sub,parts};
+}
+
+function renderSum(){
+  const r=calc();
+  document.getElementById('total').textContent='฿'+fmt(r.total);
+  document.getElementById('breakdown').textContent=`🍺 ${fmt(r.parts.promos)} · 🧊 ${fmt(r.parts.ice)} · 🥤 ${fmt(r.parts.mix)} · 🍟 ${fmt(r.parts.food)}`;
+  document.getElementById('cards').innerHTML=S.people.map(p=>{const x=r.per[p.id];
+    return `<div class="pc" style="border-color:${p.c}"><div class="n"><span style="color:${p.c}">👤 ${esc(p.n)}</span><span class="amt">฿${fmt(Math.ceil(x.total))}</span></div>
+    <ul>${x.lines.map(l=>`<li><span>${esc(l[0])}</span><span>${fmt(l[1])}</span></li>`).join('')||'<li>ยังไม่โดนค่าอะไร</li>'}</ul></div>`}).join('')||'<div class="mu">ยังไม่มีเพื่อนในโต๊ะ</div>';
+}
+
+function copyLine(){
+  const r=calc();
+  let t='🍻 สรุปยอดหารค่าปาร์ตี้ 🍻\n'+(SHOP?'🏪 '+SHOP.name+'\n':'')+'━━━━━━━━━━━━\n';
+  S.people.forEach(p=>{const x=r.per[p.id];t+=`\n👤 ${p.n}  ➜  ${fmt(Math.ceil(x.total))} บาท\n`;x.lines.forEach(l=>t+=`   • ${l[0]} ${fmt(l[1])}\n`)});
+  t+=`\n━━━━━━━━━━━━\n💰 รวมทั้งโต๊ะ ${fmt(r.total)} บาท\n(ยอดโอนปัดขึ้นเป็นบาทเต็ม) โอนมาได้เลยนะทุกคน 🙏`;
+  const done=()=>{const e=document.getElementById('toast');e.style.display='block';setTimeout(()=>e.style.display='none',1800)};
+  const fb=()=>{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');done()}catch(e){a.remove();showTxt(t);return}a.remove()};
+  navigator.clipboard?navigator.clipboard.writeText(t).then(done,fb):fb();
+}
+function resetAll(){if(twice('reset','กดอีกครั้งเพื่อล้างบิลและรายชื่อทั้งหมด')){S=def();save();render();say('เริ่มบิลใหม่แล้ว')}}
+load();render();initShop();
+</script>
+</body>
+</html>
